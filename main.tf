@@ -3,6 +3,7 @@ terraform {
     aws = {
       source = "hashicorp/aws"
       version = "3.73.0"
+
     }
   }
 }
@@ -10,6 +11,8 @@ terraform {
 provider "aws" {
   # Configuration options
   region = var.dev_machine_region
+        access_key = var.access_key
+      secret_key = var.secret_key
 }
 
 data "aws_vpc" "default" {
@@ -27,7 +30,7 @@ resource "random_string" "random" {
   upper = false
 }
 
-resource "aws_security_group" "dev_machine_firewall" {
+/*resource "aws_security_group" "dev_machine_firewall" {
   name = "dev_machine_sg"
   vpc_id = data.aws_vpc.default.id
 
@@ -66,7 +69,7 @@ resource "aws_security_group" "dev_efs_firewall" {
     cidr_blocks      = [ "0.0.0.0/0" ]
   }
 }
-
+*/
 resource "aws_efs_file_system" "dev_efs" {
   availability_zone_name = var.dev_efs_az
   creation_token = "dev_machine_files"
@@ -121,7 +124,7 @@ resource "aws_efs_access_point" "dev_efs_docker_ap" {
 resource "aws_efs_mount_target" "dev_efs_mount" {
   file_system_id = aws_efs_file_system.dev_efs.id
   subnet_id = data.aws_subnet.default.id
-  security_groups = [ aws_security_group.dev_efs_firewall.id ]
+  #security_groups = [ aws_security_group.dev_efs_firewall.id ]
 }
 
 resource "aws_eip" "dev_machine_ip" {
@@ -134,7 +137,7 @@ resource "aws_ssm_parameter" "dev_machine_ip" {
   value = aws_eip.dev_machine_ip.allocation_id
 }
 
-resource "aws_ssm_parameter" "dev_efs_az" {
+/*resource "aws_ssm_parameter" "dev_efs_az" {
   name  = "dev_efs_az"
   type  = "String"
   value = var.dev_efs_az
@@ -163,7 +166,7 @@ resource "aws_ssm_parameter" "dev_efs_docker_ap" {
 #  type  = "String"
 #  value = var.dev_ssh_public_key
 #}
-
+*/
 data "aws_ami" "amzn_linux2" {
   owners = ["amazon"]
   most_recent = "true"
@@ -213,7 +216,7 @@ resource "aws_spot_fleet_request" "dev_spot_request" {
     ami = data.aws_ami.amzn_linux2.id
     spot_price = var.dev_spot_price
     iam_instance_profile = aws_iam_instance_profile.dev_ec2_profile.name
-    vpc_security_group_ids = [aws_security_group.dev_machine_firewall.id]
+    #vpc_security_group_ids = [aws_security_group.dev_machine_firewall.id]
 
     user_data = <<EOF
 #!/bin/sh

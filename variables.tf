@@ -5,10 +5,16 @@ variable "dev_machine_region" {
 }
 
 # We choose EFS One Zone Storage for cheaper option
-variable "dev_efs_az" {
+variable "access_key" {
   type = string
   default = null
 }
+
+variable "secret_key" {
+  type = string
+  default = null
+}
+variable "dev_efs_az" {}
 
 # Max EC2 spot price
 variable "dev_spot_price" {
